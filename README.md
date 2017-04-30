@@ -3,7 +3,7 @@ _A nice logo a friend of mine made for me_
 # rever's-hell
 __*An open-source Python reverse shell and keylogger (soon) based on [Turtle Reverse Shell](https://github.com/buckyroberts/Turtle)*__
 
-Feel free to help me to build this project :D
+Feel free to help me build this project :D
 
 # Usage
 You first need to configure the IP addresses and ports that will be used to run the shell.
