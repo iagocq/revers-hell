@@ -210,10 +210,13 @@ class ReverServer:
                     continue
                 if cmd == 'quit':
                     return True
+                # Sends test string
                 conn.send(str.encode('heylisten'))
                 conn.recv(1024)
                 time.sleep(0.1)
+                # Sends command
                 conn.send(str.encode(cmd))
+                # Response
                 resp = conn.recv(10240).decode('utf-8')
                 client.cwd = conn.recv(10240).decode('utf-8')
                 self.clients[ind] = client
